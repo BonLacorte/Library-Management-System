@@ -1,6 +1,5 @@
 name: Spring Boot CI Build
 
-<<<<<<< HEAD
 on:
   push:
     branches: [ "main", "master" ]
@@ -25,34 +24,3 @@ jobs:
 
     - name: Build with Maven
       run: mvn clean package
-=======
-# 1. The Trigger: When should this pipeline run?
-on:
-  push:
-    branches: [ "main", "master" ] # Runs when you push to main/master
-  pull_request:
-    branches: [ "main", "master" ]
-
-# 2. The Jobs: What should the robot do?
-jobs:
-  build:
-    # GitHub will give you a free, temporary Linux server to run this
-    runs-on: ubuntu-latest
-
-    steps:
-    # Step A: Download your code onto the temporary server
-    - name: Checkout Source Code
-      uses: actions/checkout@v4
-
-    # Step B: Install the exact version of Java you need
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17' # Change to '21' if you are using Java 21!
-        distribution: 'temurin'
-        cache: 'maven' # Big Brain Move: Caches your dependencies so future builds are 5x faster
-
-    # Step C: Run Maven to compile the code and build the .jar file
-    - name: Build with Maven
-      run: mvn clean package -DskipTests
->>>>>>> 047c20339c260c6ef9becf4fc38c9d57baeb7deb
