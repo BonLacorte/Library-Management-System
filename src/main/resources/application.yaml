@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/library_db}
+    username: ${DB_USERNAME:sampleuser}
+    password: ${DB_PASSWORD:samplepass}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+  
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:dummy_email@gmail.com}
+    password: ${MAIL_PASSWORD:dummy_mail_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+  
+  show-sql: true
+  properties:
+    hibernate:
+      format_sql: true
+  database: PostgreSQL
+  database-platform: org.hibernate.dialect.PostgreSQLDialect
+  
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:dummy_razorpay_id}
+    secret: ${RAZORPAY_KEY_SECRET:dummy_razorpay_secret}
+  callback-url:
+      base-url: ${FRONTEND_URL:http://localhost:5173}
