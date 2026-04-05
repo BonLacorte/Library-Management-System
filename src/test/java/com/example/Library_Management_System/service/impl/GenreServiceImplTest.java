@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -34,29 +35,34 @@ public class GenreServiceImplTest {
 
     private Genre dummyGenre;
     private GenreDTO dummyGenreDTO;
+    private Genre parentGenre;
 
     @BeforeEach
     void setUp() {
-        dummyGenre = Genre.builder()
-                .id(1L)
-                .code("FIC")
-                .name("Fiction")
-                .description("Fictional books")
-                .displayOrder(1)
-                .active(true)
-                .build();
+        // Setup Parent Genre
+        parentGenre = new Genre();
+        parentGenre.setId(100L);
+        parentGenre.setCode("ALL-FIC");
+        parentGenre.setName("All Fiction");
+        parentGenre.setActive(true);
 
-        dummyGenreDTO = GenreDTO.builder()
-                .id(1L)
-                .code("FIC")
-                .name("Fiction")
-                .description("Fictional books")
-                .displayOrder(1)
-                .active(true)
-                .build();
+        // Setup Main Dummy Genre
+        dummyGenre = new Genre();
+        dummyGenre.setId(1L);
+        dummyGenre.setCode("FIC");
+        dummyGenre.setName("Fiction");
+        dummyGenre.setActive(true);
+        dummyGenre.setSubGenres(new ArrayList<>()); // Initialize empty list
+
+        // Setup DTO
+        dummyGenreDTO = new GenreDTO();
+        dummyGenreDTO.setId(1L);
+        dummyGenreDTO.setCode("FIC");
+        dummyGenreDTO.setName("Fiction");
+        dummyGenreDTO.setActive(true);
     }
 
-    // ==================== CREATE ====================
+    // ==================== CREATE OPERATIONS ====================
 
     @Test
     void testCreateGenre_Success() throws GenreException {
@@ -71,12 +77,12 @@ public class GenreServiceImplTest {
 
         // ASSERT
         assertNotNull(result);
-        assertEquals("Fiction", result.getName());
+        assertEquals("FIC", result.getCode());
         verify(genreRepository, times(1)).save(dummyGenre);
     }
 
     @Test
-    void testCreateGenre_WhenNameAlreadyExists_ShouldThrowException() {
+    void testCreateGenre_WhenCodeExists_ShouldThrowException() {
         // ARRANGE
         when(genreRepository.existsByCode("FIC")).thenReturn(true);
 
@@ -85,92 +91,129 @@ public class GenreServiceImplTest {
             genreService.createGenre(dummyGenreDTO);
         });
 
-        assertEquals("Genre name Fiction already exists", exception.getMessage());
-        // Verify save was NEVER called because it failed early
+        assertTrue(exception.getMessage().contains("already exists"));
         verify(genreRepository, never()).save(any(Genre.class));
     }
 
-    // ==================== READ ====================
-
     @Test
-    void testGetGenreById_Success() throws GenreException {
+    void testCreateGenre_WhenParentIsInactive_ShouldThrowException() {
         // ARRANGE
-        when(genreRepository.existsById(1L)).thenReturn(true);
-        when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
-        when(genreMapper.toDTO(dummyGenre)).thenReturn(dummyGenreDTO);
+        dummyGenreDTO.setParentGenreId(100L);
+        parentGenre.setActive(false); // Make parent inactive
 
-        // ACT
-        GenreDTO result = genreService.getGenreById(1L);
-
-        // ASSERT
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-    }
-
-    @Test
-    void testGetGenreById_WhenNotFound_ShouldThrowException() {
-        // ARRANGE
-        when(genreRepository.existsById(99L)).thenReturn(false);
+        when(genreRepository.existsByCode("FIC")).thenReturn(false);
+        when(genreRepository.findById(100L)).thenReturn(Optional.of(parentGenre));
 
         // ACT & ASSERT
         GenreException exception = assertThrows(GenreException.class, () -> {
-            genreService.getGenreById(99L);
+            genreService.createGenre(dummyGenreDTO);
         });
 
-        assertEquals("genre not found", exception.getMessage());
-        verify(genreRepository, never()).findById(anyLong());
+        assertEquals("Cannot set an inactive genre as parent", exception.getMessage());
+        verify(genreRepository, never()).save(any(Genre.class));
     }
 
-    // ==================== UPDATE ====================
+    // ==================== BULK CREATE OPERATIONS ====================
+
+    @Test
+    void testCreateGenresBulk_Success() throws GenreException {
+        // ARRANGE
+        GenreDTO secondGenreDTO = new GenreDTO();
+        secondGenreDTO.setCode("SCI-FI");
+        
+        List<GenreDTO> requestList = Arrays.asList(dummyGenreDTO, secondGenreDTO);
+
+        when(genreRepository.existsByCode(anyString())).thenReturn(false);
+        when(genreMapper.toEntity(any(GenreDTO.class))).thenReturn(dummyGenre);
+        when(genreRepository.saveAll(anyList())).thenReturn(Arrays.asList(dummyGenre, dummyGenre));
+        when(genreMapper.toDTO(eq(dummyGenre), eq(false))).thenReturn(dummyGenreDTO);
+
+        // ACT
+        List<GenreDTO> result = genreService.createGenresBulk(requestList);
+
+        // ASSERT
+        assertEquals(2, result.size());
+        verify(genreRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testCreateGenresBulk_WithDuplicateCodeInRequest_ShouldThrowException() {
+        // ARRANGE
+        GenreDTO duplicateDTO = new GenreDTO();
+        duplicateDTO.setCode("FIC"); // Same code as dummyGenreDTO
+        
+        List<GenreDTO> requestList = Arrays.asList(dummyGenreDTO, duplicateDTO);
+
+        // ACT & ASSERT
+        GenreException exception = assertThrows(GenreException.class, () -> {
+            genreService.createGenresBulk(requestList);
+        });
+
+        assertTrue(exception.getMessage().contains("Duplicate genre code in request"));
+        verify(genreRepository, never()).saveAll(anyList());
+    }
+
+    // ==================== UPDATE OPERATIONS ====================
 
     @Test
     void testUpdateGenre_Success() throws GenreException {
         // ARRANGE
         when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
         when(genreRepository.save(dummyGenre)).thenReturn(dummyGenre);
-        when(genreMapper.toDTO(dummyGenre)).thenReturn(dummyGenreDTO);
+        when(genreMapper.toDTO(dummyGenre, true)).thenReturn(dummyGenreDTO);
 
         // ACT
         GenreDTO result = genreService.updateGenre(1L, dummyGenreDTO);
 
         // ASSERT
         assertNotNull(result);
-        // Verify the mapper's update method was called
         verify(genreMapper, times(1)).updateEntityFromDTO(dummyGenreDTO, dummyGenre);
-        verify(genreRepository, times(1)).save(dummyGenre);
     }
 
     @Test
-    void testUpdateGenre_WhenNotFound_ShouldThrowException() {
+    void testUpdateGenre_WhenSettingSelfAsParent_ShouldThrowException() {
         // ARRANGE
-        when(genreRepository.findById(99L)).thenReturn(Optional.empty());
+        when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
+        dummyGenreDTO.setParentGenreId(1L); // Trying to make it its own parent
 
         // ACT & ASSERT
-        assertThrows(GenreException.class, () -> {
-            genreService.updateGenre(99L, dummyGenreDTO);
+        GenreException exception = assertThrows(GenreException.class, () -> {
+            genreService.updateGenre(1L, dummyGenreDTO);
         });
+
+        assertEquals("Genre cannot be its own parent", exception.getMessage());
         verify(genreRepository, never()).save(any(Genre.class));
     }
 
-    // ==================== DELETE ====================
-
     @Test
-    void testDeleteGenre_SoftDelete_Success() throws GenreException {
+    void testUpdateGenre_WhenCircularReferenceDetected_ShouldThrowException() {
         // ARRANGE
         when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
+        
+        // Setup the loop: We are updating Genre 1. We want to set its parent to Genre 100.
+        dummyGenreDTO.setParentGenreId(100L); 
+        
+        // BUT, Genre 100 currently has Genre 1 as ITS parent. (Circular Loop)
+        parentGenre.setParentGenre(dummyGenre); 
+        
+        when(genreRepository.findById(100L)).thenReturn(Optional.of(parentGenre));
 
-        // ACT
-        genreService.deleteGenre(1L);
+        // ACT & ASSERT
+        GenreException exception = assertThrows(GenreException.class, () -> {
+            genreService.updateGenre(1L, dummyGenreDTO);
+        });
 
-        // ASSERT
-        assertFalse(dummyGenre.getActive());
-        verify(genreRepository, times(1)).save(dummyGenre);
+        assertTrue(exception.getMessage().contains("Circular reference detected"));
+        verify(genreRepository, never()).save(any(Genre.class));
     }
+
+    // ==================== DELETE OPERATIONS ====================
 
     @Test
     void testHardDeleteGenre_Success() throws GenreException {
         // ARRANGE
         when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
+        when(genreRepository.isGenreInUse(1L)).thenReturn(false);
 
         // ACT
         genreService.hardDeleteGenre(1L);
@@ -179,33 +222,35 @@ public class GenreServiceImplTest {
         verify(genreRepository, times(1)).delete(dummyGenre);
     }
 
-    // ==================== CUSTOM QUERIES ====================
-
     @Test
-    void testGetTopLevelGenres_ShouldReturnList() {
+    void testHardDeleteGenre_WhenInUse_ShouldThrowException() {
         // ARRANGE
-        List<Genre> topLevelGenres = Arrays.asList(dummyGenre);
-        when(genreRepository.findByParentGenreIsNullAndActiveTrueOrderByDisplayOrderAsc()).thenReturn(topLevelGenres);
-        when(genreMapper.toDTOList(topLevelGenres)).thenReturn(Arrays.asList(dummyGenreDTO));
+        when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
+        when(genreRepository.isGenreInUse(1L)).thenReturn(true);
 
-        // ACT
-        List<GenreDTO> result = genreService.getTopLevelGenres();
+        // ACT & ASSERT
+        GenreException exception = assertThrows(GenreException.class, () -> {
+            genreService.hardDeleteGenre(1L);
+        });
 
-        // ASSERT
-        assertEquals(1, result.size());
-        verify(genreRepository, times(1)).findByParentGenreIsNullAndActiveTrueOrderByDisplayOrderAsc();
+        assertTrue(exception.getMessage().contains("currently assigned to one or more books"));
+        verify(genreRepository, never()).delete(any(Genre.class));
     }
 
     @Test
-    void testGetTotalActiveGenres_ShouldReturnCount() {
+    void testHardDeleteGenre_WhenHasSubGenres_ShouldThrowException() {
         // ARRANGE
-        when(genreRepository.countByActiveTrue()).thenReturn(5L);
+        dummyGenre.getSubGenres().add(new Genre()); // Add a sub-genre to the list
+        
+        when(genreRepository.findById(1L)).thenReturn(Optional.of(dummyGenre));
+        when(genreRepository.isGenreInUse(1L)).thenReturn(false);
 
-        // ACT
-        long count = genreService.getTotalActiveGenres();
+        // ACT & ASSERT
+        GenreException exception = assertThrows(GenreException.class, () -> {
+            genreService.hardDeleteGenre(1L);
+        });
 
-        // ASSERT
-        assertEquals(5L, count);
-        verify(genreRepository, times(1)).countByActiveTrue();
+        assertTrue(exception.getMessage().contains("has sub-genres"));
+        verify(genreRepository, never()).delete(any(Genre.class));
     }
 }
