@@ -33,24 +33,28 @@ public class Genre {
     @Size(max = 500, message = "Descripiton must not exceed 500 characters")
     private String description;
 
-    @Min(value=0, message = "Display order cannot be negative")
+    @Min(value = 0, message = "Display order cannot be negative")
+    @Column(name = "display_order")
     private Integer displayOrder = 0;
 
     @Column(nullable = false)
     private Boolean active = true;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_genre_id")
     private Genre parentGenre;
 
-    @OneToMany
-    private List<Genre> subGenres = new ArrayList<Genre>();
+    @OneToMany(mappedBy = "parentGenre", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Genre> subGenres = new ArrayList<>();
 
-    // @OneToMany(mappedBy = "genre", cascade = CascadeType.PERSIST)
-    // private List<Book> books = new ArrayList<Book>();
+    @OneToMany(mappedBy = "genre", cascade = CascadeType.PERSIST)
+    private List<Book> books = new ArrayList<>();
 
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

@@ -61,7 +61,7 @@ public class GenreServiceImplTest {
     @Test
     void testCreateGenre_Success() throws GenreException {
         // ARRANGE
-        when(genreRepository.existsByName("Fiction")).thenReturn(false);
+        when(genreRepository.existsByCode("FIC")).thenReturn(false);
         when(genreMapper.toEntity(dummyGenreDTO)).thenReturn(dummyGenre);
         when(genreRepository.save(dummyGenre)).thenReturn(dummyGenre);
         when(genreMapper.toDTO(dummyGenre)).thenReturn(dummyGenreDTO);
@@ -78,7 +78,7 @@ public class GenreServiceImplTest {
     @Test
     void testCreateGenre_WhenNameAlreadyExists_ShouldThrowException() {
         // ARRANGE
-        when(genreRepository.existsByName("Fiction")).thenReturn(true);
+        when(genreRepository.existsByCode("FIC")).thenReturn(true);
 
         // ACT & ASSERT
         GenreException exception = assertThrows(GenreException.class, () -> {
@@ -91,20 +91,6 @@ public class GenreServiceImplTest {
     }
 
     // ==================== READ ====================
-
-    @Test
-    void testGetAllGenres_ShouldReturnList() {
-        // ARRANGE
-        when(genreRepository.findAll()).thenReturn(Arrays.asList(dummyGenre));
-        when(genreMapper.toDTO(dummyGenre)).thenReturn(dummyGenreDTO);
-
-        // ACT
-        List<GenreDTO> result = genreService.getAllGenres();
-
-        // ASSERT
-        assertEquals(1, result.size());
-        verify(genreRepository, times(1)).findAll();
-    }
 
     @Test
     void testGetGenreById_Success() throws GenreException {

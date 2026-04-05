@@ -1,5 +1,6 @@
 package com.example.Library_Management_System.mapper;
 
+import com.example.Library_Management_System.exception.GenreException;
 import com.example.Library_Management_System.modal.Genre;
 import com.example.Library_Management_System.payload.dto.GenreDTO;
 import com.example.Library_Management_System.repository.GenreRepository;
@@ -15,78 +16,122 @@ public class GenreMapper {
 
     private final GenreRepository genreRepository;
 
-    public GenreDTO toDTO(Genre savedGenre) {
-        if (savedGenre == null) {
+    /**
+     * Convert Genre entity to GenreDTO
+     */
+    public GenreDTO toDTO(Genre genre) {
+        return toDTO(genre, false);
+    }
+
+    /**
+     * Convert Genre entity to GenreDTO
+     */
+    public GenreDTO toDTO(Genre genre, 
+    boolean includeSubGenres) {
+        if (genre == null) {
             return null;
         }
 
-        GenreDTO dto = GenreDTO.builder()
-                .id(savedGenre.getId())
-                .code(savedGenre.getCode())
-                .name(savedGenre.getName())
-                .description(savedGenre.getDescription())
-                .displayOrder(savedGenre.getDisplayOrder())
-                .active(savedGenre.getActive())
-                .createdAt(savedGenre.getCreatedAt())
-                .updatedAt(savedGenre.getUpdatedAt())
-                .build();
+        GenreDTO dto = new GenreDTO();
+        dto.setId(genre.getId());
+        dto.setCode(genre.getCode());
+        dto.setName(genre.getName());
+        dto.setDescription(genre.getDescription());
+        dto.setDisplayOrder(genre.getDisplayOrder());
+        dto.setActive(genre.getActive());
+        dto.setCreatedAt(genre.getCreatedAt());
+        dto.setUpdatedAt(genre.getUpdatedAt());
 
-        if(savedGenre.getParentGenre() != null) {
-            dto.setParentGenreId(savedGenre.getParentGenre().getId());
-            dto.setParentGenreName(savedGenre.getParentGenre().getName());
+        // Set parent genre info if exists
+        if (genre.getParentGenre() != null) {
+            dto.setParentGenreId(genre.getParentGenre().getId());
+            dto.setParentGenreName(genre.getParentGenre().getName());
         }
 
-        if (savedGenre.getSubGenres() != null &&  !savedGenre.getSubGenres().isEmpty()) {
-            dto.setSubGenre(savedGenre.getSubGenres().stream().
-                    filter(subGenre -> subGenre.getActive())
-                    .map(subGenre -> toDTO(subGenre)).collect(Collectors.toList()));
+        // Include sub-genres if requested (recursively)
+        if (includeSubGenres && genre.getSubGenres() != null && !genre.getSubGenres().isEmpty()) {
+            dto.setSubGenres(genre.getSubGenres().stream()
+                .filter(subGenre -> subGenre.getActive()) // Only include active sub-genres
+                .map(subGenre -> toDTO(subGenre, true)) // Recursive: include sub-genres of sub-genres
+                .collect(Collectors.toList()));
         }
+
+        // Set book count
+        dto.setBookCount((long) (genre.getBooks() != null ? genre.getBooks().size() : 0));
 
         return dto;
     }
 
-    public Genre toEntity(GenreDTO genreDTO) {
-        if (genreDTO == null) {
+    /**
+     * Convert GenreDTO to Genre entity
+     */
+    public Genre toEntity(GenreDTO dto) {
+        if (dto == null) {
             return null;
         }
 
-        Genre genre = Genre.builder()
-                .code(genreDTO.getCode())
-                .name(genreDTO.getName())
-                .description(genreDTO.getDescription())
-                .displayOrder(genreDTO.getDisplayOrder())
-                .active(true)
-                .build();
+        Genre genre = new Genre();
+        genre.setId(dto.getId());
+        genre.setCode(dto.getCode());
+        genre.setName(dto.getName());
+        genre.setDescription(dto.getDescription());
+        genre.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
 
-        if (genreDTO.getParentGenreId() != null) {
-            genreRepository.findById(genreDTO.getParentGenreId()).ifPresent(
-                    genre::setParentGenre
-            );
+        if (dto.getActive() != null) {
+            genre.setActive(dto.getActive());
+        } else {
+            genre.setActive(true); // Default to active
+        }
+
+        // Set parent genre if provided
+        if (dto.getParentGenreId() != null) {
+            genreRepository.findById(dto.getParentGenreId())
+                .ifPresent(genre::setParentGenre);
         }
 
         return genre;
     }
 
-    public void updateEntityFromDTO(GenreDTO dto, Genre existingGenre) {
-        if (dto == null || existingGenre == null) {
+    /**
+     * Update existing Genre entity with data from GenreDTO (for update operations)
+     */
+    public void updateEntityFromDTO(GenreDTO dto, Genre genre) {
+        if (dto == null || genre == null) {
             return;
         }
 
-        existingGenre.setCode(dto.getCode());
-        existingGenre.setName(dto.getName());
-        existingGenre.setDescription(dto.getDescription());
-        existingGenre.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
+        genre.setCode(dto.getCode());
+        genre.setName(dto.getName());
+        genre.setDescription(dto.getDescription());
+        genre.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
 
         if (dto.getActive() != null) {
-            existingGenre.setActive(dto.getActive());
+            genre.setActive(dto.getActive());
         }
 
+        // Update parent genre if provided
         if (dto.getParentGenreId() != null) {
-            genreRepository.findById(dto.getParentGenreId()).ifPresent(existingGenre::setParentGenre);
+            genreRepository.findById(dto.getParentGenreId())
+                .ifPresent(genre::setParentGenre);
         }
     }
 
-    public List<GenreDTO> toDTOList(List<Genre> genreList) {
-        return genreList.stream().map(genre -> toDTO(genre)).collect(Collectors.toList());
+    /**
+     * Convert list of Genre entities to list of GenreDTOs
+     */
+    public List<GenreDTO> toDTOList(List<Genre> genres) {
+        return toDTOList(genres, false);
+    }
+
+    /**
+     * Convert list of Genre entities to list of GenreDTOs with option to include sub-genres
+     */
+    public List<GenreDTO> toDTOList(List<Genre> genres, boolean includeSubGenres) {
+        if (genres == null) {
+            return null;
+        }
+        return genres.stream()
+            .map(genre -> toDTO(genre, includeSubGenres))
+            .collect(Collectors.toList());
     }
 }

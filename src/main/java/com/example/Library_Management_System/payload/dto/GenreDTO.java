@@ -35,7 +35,7 @@ public class GenreDTO {
 
     private String parentGenreName;
 
-    private List<GenreDTO> subGenre;
+    private List<GenreDTO> subGenres;
 
     private Long bookCount;
 
