@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "data.initialization.enabled", havingValue = "true", matchIfMissing = true)
 public class DataInitializationComponent implements CommandLineRunner {
 
     private final UserRepository userRepository;
