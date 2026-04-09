@@ -10,7 +10,6 @@ import com.example.Library_Management_System.payload.response.AuthResponse;
 import com.example.Library_Management_System.repository.PasswordResetTokenRepository;
 import com.example.Library_Management_System.repository.UserRepository;
 import com.example.Library_Management_System.service.EmailService;
-import com.example.Library_Management_System.service.WishlistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,8 +48,6 @@ public class AuthServiceImplTest {
     @Mock
     private CustomUserImplementation customUserImplementation;
 
-    @Mock
-    private WishlistService wishlistService;
 
     @Mock
     private PasswordResetTokenRepository passwordResetTokenRepository;
