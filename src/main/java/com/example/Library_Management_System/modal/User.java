@@ -19,9 +19,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-// @EqualsAndHashCode
+@EqualsAndHashCode
 @NoArgsConstructor
-// @AllArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class User {
