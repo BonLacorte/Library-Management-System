@@ -17,13 +17,13 @@ public class DataInitializationComponent implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${admin.email}")
+    @Value("${admin.email:admin@example.com}")
     private String adminEmail;
 
-    @Value("${admin.password}")
+    @Value("${admin.password:123456}")
     private String adminPassword;
 
-    @Value("${admin.username}")
+    @Value("${admin.username:admin}")
     private String adminUsername;
 
     @Override
