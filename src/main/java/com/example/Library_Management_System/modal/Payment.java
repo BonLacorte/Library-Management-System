@@ -45,12 +45,13 @@ public class Payment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // TODO: book loan id
     /**
      * Related book loan (if payment is for a fine)
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_loan_id")
-    private BookLoan bookLoan;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "book_loan_id")
+    // private BookLoan bookLoan;
 
     /**
      * Related subscription (if payment is for subscription)
@@ -59,8 +60,12 @@ public class Payment {
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Fine fine;
+    // TODO: fine id
+    /**
+     * Related fine (if payment is for a fine)
+     */
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // private Fine fine;
 
     /**
      * Type of payment (FINE, MEMBERSHIP, etc.)

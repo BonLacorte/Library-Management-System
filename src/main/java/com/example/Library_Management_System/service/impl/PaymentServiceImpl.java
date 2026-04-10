@@ -265,8 +265,8 @@ public class PaymentServiceImpl implements PaymentService {
         // Create new payment initiate request from existing payment
         PaymentInitiateRequest request = new PaymentInitiateRequest();
         request.setUserId(payment.getUser().getId());
-        // todo: book loan id
-        request.setBookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null);
+        // // todo: book loan id
+        // request.setBookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null);
         request.setPaymentType(payment.getPaymentType());
         request.setGateway(payment.getGateway());
         request.setAmount(payment.getAmount());

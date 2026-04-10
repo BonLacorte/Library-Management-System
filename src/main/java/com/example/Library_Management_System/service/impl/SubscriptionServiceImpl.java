@@ -49,9 +49,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
-    private final PaymentRepository paymentRepository;
+    // private final PaymentRepository paymentRepository;
     private final SubscriptionMapper subscriptionMapper;
-    private final RazorpayService razorpayService;
+    // private final RazorpayService razorpayService;
     // private final StripeService stripeService;
     private final UserService userService;
     private final PaymentService paymentService;
