@@ -9,7 +9,7 @@ import com.example.Library_Management_System.payload.response.PageResponse;
 import com.example.Library_Management_System.repository.BookRepository;
 import com.example.Library_Management_System.service.BookService;
 import com.example.Library_Management_System.service.UserService;
-import com.example.Library_Management_System.repository.ReservationRepository;
+// import com.example.Library_Management_System.repository.ReservationRepository;
 import com.example.Library_Management_System.repository.BookLoanRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
    private final BookLoanRepository bookLoanRepository;
    private final UserService userService;
-   private final ReservationRepository reservationRepository;
+//    private final ReservationRepository reservationRepository;
 
 
     // ==================== CRUD OPERATIONS ====================
