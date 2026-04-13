@@ -47,12 +47,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
-    // private final BookLoanRepository bookLoanRepository;
+    private final BookLoanRepository bookLoanRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PaymentMapper paymentMapper;
     private final RazorpayService razorpayService;
     // private final StripeService stripeService;
-    // private final FineRepository fineRepository;
+    private final FineRepository fineRepository;
     private final PaymentEventPublisher paymentEventPublisher;
 
 
@@ -86,17 +86,17 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // todo: book loan id
-        // if (request.getBookLoanId() != null) {
-        //     BookLoan loan = bookLoanRepository.findById(request.getBookLoanId())
-        //             .orElseThrow(() -> new PaymentException("Book loan not found"));
-        //     payment.setBookLoan(loan);
-        // }
+        if (request.getBookLoanId() != null) {
+            BookLoan loan = bookLoanRepository.findById(request.getBookLoanId())
+                    .orElseThrow(() -> new PaymentException("Book loan not found"));
+            payment.setBookLoan(loan);
+        }
 
-        // if (request.getFineId() != null) {
-        //     Fine fine = fineRepository.findById(request.getFineId())
-        //             .orElseThrow(() -> new PaymentException("Fine not found"));
-        //     payment.setFine(fine);
-        // }
+        if (request.getFineId() != null) {
+            Fine fine = fineRepository.findById(request.getFineId())
+                    .orElseThrow(() -> new PaymentException("Fine not found"));
+            payment.setFine(fine);
+        }
 
         payment = paymentRepository.save(payment);
 
@@ -266,7 +266,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentInitiateRequest request = new PaymentInitiateRequest();
         request.setUserId(payment.getUser().getId());
         // // todo: book loan id
-        // request.setBookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null);
+        request.setBookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null);
         request.setPaymentType(payment.getPaymentType());
         request.setGateway(payment.getGateway());
         request.setAmount(payment.getAmount());
@@ -404,9 +404,9 @@ public class PaymentServiceImpl implements PaymentService {
             .currency(payment.getCurrency())
             .subscriptionId(payment.getSubscription() != null ? payment.getSubscription().getId() : null)
             // // todo: fine id
-            // .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
+            .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
             // // todo: book loan id
-            // .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
+            .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
             .transactionId(payment.getTransactionId())
             .initiatedAt(payment.getInitiatedAt())
             .description(payment.getDescription())
@@ -433,9 +433,9 @@ public class PaymentServiceImpl implements PaymentService {
             .currency(payment.getCurrency())
             .subscriptionId(payment.getSubscription() != null ? payment.getSubscription().getId() : null)
             // // todo: fine id
-            // .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
+            .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
             // // todo: book loan id
-            // .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
+            .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
             .gatewayPaymentId(payment.getGatewayPaymentId())
             .transactionId(payment.getTransactionId())
             .completedAt(payment.getCompletedAt())
@@ -460,9 +460,9 @@ public class PaymentServiceImpl implements PaymentService {
             .currency(payment.getCurrency())
             .subscriptionId(payment.getSubscription() != null ? payment.getSubscription().getId() : null)
             // // todo: fine id
-            // .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
+            .fineId(payment.getFine() != null ? payment.getFine().getId() : null)
             // // todo: book loan id
-            // .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
+            .bookLoanId(payment.getBookLoan() != null ? payment.getBookLoan().getId() : null)
             .failureReason(payment.getFailureReason())
             .gatewayPaymentId(payment.getGatewayPaymentId())
             .transactionId(payment.getTransactionId())

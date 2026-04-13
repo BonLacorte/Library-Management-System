@@ -2,8 +2,8 @@ package com.example.Library_Management_System.event.listener;
 
 import com.example.Library_Management_System.event.PaymentSuccessEvent;
 import com.example.Library_Management_System.exception.SubscriptionException;
-// import com.example.Library_Management_System.service.BookLoanService;
-// import com.example.Library_Management_System.service.FineService;
+import com.example.Library_Management_System.service.BookLoanService;
+import com.example.Library_Management_System.service.FineService;
 import com.example.Library_Management_System.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PaymentEventListener {
 
-    // private final FineService fineService;
+    private final FineService fineService;
     private final SubscriptionService subscriptionService;
 
 
@@ -33,12 +33,12 @@ public class PaymentEventListener {
             case FINE:
             case DAMAGED_BOOK_PENALTY:
             // todo: lost book - fine
-            // case LOST_BOOK_PENALTY:
-            //     fineService.markFineAsPaid(
-            //             event.getFineId(),
-            //             event.getAmount(),
-            //             event.getTransactionId()
-            //     );
+            case LOST_BOOK_PENALTY:
+                fineService.markFineAsPaid(
+                        event.getFineId(),
+                        event.getAmount(),
+                        event.getTransactionId()
+                );
                 break;
 
             case MEMBERSHIP:
