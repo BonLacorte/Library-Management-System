@@ -36,7 +36,7 @@ import com.example.Library_Management_System.repository.BookRepository;
 import com.example.Library_Management_System.repository.UserRepository;
 import com.example.Library_Management_System.service.BookLoanService;
 import com.example.Library_Management_System.service.FineCalculationService;
-import com.example.Library_Management_System.service.ReservationService;
+// import com.example.Library_Management_System.service.ReservationService;
 import com.example.Library_Management_System.service.SubscriptionService;
 
 import jakarta.transaction.Transactional;
@@ -58,20 +58,22 @@ public class BookLoanServiceImpl implements BookLoanService {
     private final FineCalculationService fineCalculationService;
     private final SubscriptionService subscriptionService;
 
-    private ReservationService reservationService; // Lazy injection to avoid circular dependency
+    // todo: reservation
+    // Lazy injection to avoid circular dependency
+    // private ReservationService reservationService; // Lazy injection to avoid circular dependency
 
     // Business rules constants - now overridden by subscription limits
     private static final int MAX_ACTIVE_CHECKOUTS = 5;
     private static final int DEFAULT_CHECKOUT_DAYS = 14;
 
 
-    // todo = reservation
+    // todo: reservation
     // Setter injection for ReservationService to avoid circular dependency
-    public void setReservationService(
-        ReservationService reservationService
-    ) {
-        this.reservationService = reservationService;
-    }
+    // public void setReservationService(
+    //     ReservationService reservationService
+    // ) {
+    //     this.reservationService = reservationService;
+    // }
 
     // ==================== CHECKOUT OPERATIONS ====================
 
