@@ -59,7 +59,7 @@ public class BookLoanController {
      * Checkout a book for a specific user (admin operation)
      * POST /api/book-loans/checkout/user/{userId}
      */
-    @PostMapping("/checkout/user/{userId}")
+    @PostMapping("/admin/checkout/user/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> checkoutBookForUser(
             @PathVariable Long userId,

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +29,8 @@ public class BookController {
      * Create a new book
      * POST /api/books
      */
-    @PostMapping
+    @PostMapping("/admin/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDTO> createBook(@Valid @RequestBody BookDTO bookDTO) {
         try {
             BookDTO createdBook = bookService.createBook(bookDTO);
@@ -42,7 +44,8 @@ public class BookController {
      * Create multiple books in bulk
      * POST /api/books/bulk
      */
-    @PostMapping("/bulk")
+    @PostMapping("/admin/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createBooksBulk(@Valid @RequestBody List<BookDTO> bookDTOs) {
         try {
             List<BookDTO> createdBooks = bookService.createBooksBulk(bookDTOs);
@@ -78,7 +81,8 @@ public class BookController {
      * Update a book
      * PUT /api/books/{id}
      */
-    @PutMapping("/{id}")
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDTO> updateBook(
             @PathVariable Long id,
             @Valid @RequestBody BookDTO bookDTO) {
@@ -94,7 +98,8 @@ public class BookController {
      * Soft delete a book (mark as inactive)
      * DELETE /api/books/{id}
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> deleteBook(@PathVariable Long id) throws BookException {
         bookService.deleteBook(id);
         return ResponseEntity.ok(new ApiResponse("Book deleted successfully",true));
@@ -104,7 +109,8 @@ public class BookController {
      * Permanently delete a book
      * DELETE /api/books/{id}/permanent
      */
-    @DeleteMapping("/{id}/permanent")
+    @DeleteMapping("/admin/{id}/permanent")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> hardDeleteBook(@PathVariable Long id) throws BookException {
         bookService.hardDeleteBook(id);
         return ResponseEntity.ok(new ApiResponse("Book permanently deleted",true));

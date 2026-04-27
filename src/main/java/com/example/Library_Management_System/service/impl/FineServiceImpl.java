@@ -59,7 +59,6 @@ public class FineServiceImpl implements FineService {
     private final FineMapper fineMapper;
     private final PaymentService paymentService;
 
-
     // ==================== CREATE OPERATIONS ====================
 
     @Override
@@ -86,15 +85,10 @@ public class FineServiceImpl implements FineService {
         return fineMapper.toDTO(savedFine);
     }
 
-
-
-
-
-
     // ==================== PAYMENT OPERATIONS ====================
 
     @Override
-    public PaymentInitiateResponse payFineFully(Long fineId, String transactionId) throws FineException, PaymentException {
+    public PaymentInitiateResponse payFineFully(Long fineId) throws FineException, PaymentException {
         // 1. Validate fine exists
         Fine fine = fineRepository.findById(fineId)
                 .orElseThrow(() -> new FineException("Fine not found with id: " + fineId));
@@ -143,7 +137,6 @@ public class FineServiceImpl implements FineService {
 
         log.info("Fine {} marked as fully paid (txn: {})", fineId, transactionId);
     }
-
 
     // ==================== WAIVER OPERATIONS ====================
 
@@ -216,11 +209,10 @@ public class FineServiceImpl implements FineService {
 
     @Override
     public PageResponse<FineDTO> getAllFines(FineStatus status,
-                                             FineType type,
-                                             Long userId,
-                                             int page,
-                                             int size
-    ) {
+            FineType type,
+            Long userId,
+            int page,
+            int size) {
         Pageable pageable = PageRequest.of(
                 page,
                 size,
@@ -230,8 +222,7 @@ public class FineServiceImpl implements FineService {
                 userId,
                 status,
                 type,
-                pageable
-        );
+                pageable);
         return convertToPageResponse(finePage);
     }
 
@@ -273,9 +264,6 @@ public class FineServiceImpl implements FineService {
         log.warn("Fine {} deleted", fineId);
     }
 
-
-
-
     // ==================== HELPER METHODS ====================
 
     private User getCurrentAuthenticatedUser() {
@@ -302,7 +290,6 @@ public class FineServiceImpl implements FineService {
                 finePage.getTotalPages(),
                 finePage.isLast(),
                 finePage.isFirst(),
-                finePage.isEmpty()
-        );
+                finePage.isEmpty());
     }
 }

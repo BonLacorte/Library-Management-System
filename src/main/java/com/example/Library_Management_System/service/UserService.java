@@ -11,21 +11,70 @@ import java.util.Set;
 
 
 public interface UserService {
+	/**
+	 * Get user by email
+	 * @param email User email
+	 * @return User entity
+	 * @throws UserException if user not found
+	 */
 	User getUserByEmail(String email) throws UserException;
+
+	/**
+	 * Get user from JWT token
+	 * @param jwt JWT token
+	 * @return User entity
+	 * @throws UserException if user not found
+	 */
 	User getUserFromJwtToken(String jwt) throws UserException;
 
+	/**
+     * Update an existing user by self
+     * @param id User ID
+     * @param userDTO Updated user data
+     * @return Updated user DTO
+     * @throws UserException if user not found or validation fails
+     */
+	UserDTO updateUserBySelf(Long id, UserDTO userDTO) throws UserException;
+
+
+
 	// /**
-    //  * Update an existing user
+    //  * Update an existing user by admin (Admin only)
     //  * @param id User ID
     //  * @param userDTO Updated user data
     //  * @return Updated user DTO
     //  * @throws UserException if user not found or validation fails
     //  */
-	// UserDTO updateUser(Long id, UserDTO userDTO) throws UserException;
+	// UserDTO updateUserByAdmin(Long id, UserDTO userDTO) throws UserException;
 
+	/**
+	 * Get user by ID
+	 * @param id User ID
+	 * @return User entity
+	 * @throws UserException if user not found
+	 */
 	User getUserById(Long id) throws UserException;
+
+	/**
+	 * Get users by role
+	 * @param role User role
+	 * @return Set of user entities
+	 * @throws UserException if role not found
+	 */
 	Set<User> getUserByRole(UserRole role) throws UserException;
+
+	/**
+	 * Get all users (Admin only)
+	 * @return List of user entities
+	 * @throws UserException if no users found
+	 */
 	List<User> getUsers() throws UserException;
+
+	/**
+	 * Get current user
+	 * @return Current user entity
+	 * @throws UserException if current user not found
+	 */
 	User getCurrentUser() throws UserException;
 
 	/**

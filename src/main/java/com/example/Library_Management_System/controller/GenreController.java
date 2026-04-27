@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,10 +30,21 @@ public class GenreController {
     // ==================== CRUD OPERATIONS ====================
 
     /**
-     * Create a new genre
-     * POST /api/genres
+     * Get a genre by id
+     * GET /api/genres/{id}
      */
-    @PostMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<GenreDTO> getGenreById(@PathVariable Long id) throws GenreException {
+        GenreDTO genre = genreService.getGenreById(id);
+        return ResponseEntity.ok(genre);
+    }
+
+    /**
+     * Create a new genre (Admin)
+     * POST /api/genres/admin/create
+     */
+    @PostMapping("/admin/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GenreDTO> createGenre(@Valid @RequestBody GenreDTO genreDTO) {
         try {
             GenreDTO createdGenre = genreService.createGenre(genreDTO);
@@ -43,10 +55,11 @@ public class GenreController {
     }
 
     /**
-     * Create multiple genres in bulk
-     * POST /api/genres/bulk
+     * Create multiple genres in bulk (Admin)
+     * POST /api/genres/admin/bulk
      */
-    @PostMapping("/bulk")
+    @PostMapping("/admin/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createGenresBulk(@Valid @RequestBody List<GenreDTO> genreDTOs) {
         try {
             List<GenreDTO> createdGenres = genreService.createGenresBulk(genreDTOs);
@@ -68,10 +81,11 @@ public class GenreController {
     }
 
     /**
-     * Update a genre
-     * PUT /api/genres/{id}
+     * Update a genre (Admin)
+     * PUT /api/genres/admin/{id}
      */
-    @PutMapping("/{id}")
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GenreDTO> updateGenre(
             @PathVariable Long id,
             @Valid @RequestBody GenreDTO genreDTO) {
@@ -84,10 +98,11 @@ public class GenreController {
     }
 
     /**
-     * Delete a genre (soft delete)
-     * DELETE /api/genres/{id}
+     * Delete a genre (soft delete) (Admin)
+     * DELETE /api/genres/admin/{id}
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> deleteGenre(@PathVariable Long id) {
         try {
             genreService.deleteGenre(id);
@@ -97,12 +112,12 @@ public class GenreController {
                 .body(new ApiResponse(e.getMessage(), false));
         }
     }
-
     /**
-     * Permanently delete a genre
-     * DELETE /api/genres/{id}/hard
+     * Permanently delete a genre (Admin)
+     * DELETE /api/genres/admin/{id}/hard
      */
-    @DeleteMapping("/{id}/hard")
+    @DeleteMapping("/admin/{id}/hard")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> hardDeleteGenre(@PathVariable Long id) {
         try {
             genreService.hardDeleteGenre(id);

@@ -30,7 +30,43 @@ public class UserServiceImpl implements UserService {
 	private final JwtProvider jwtProvider;
 
 
+
+	/**
+     * Update an existing user by self
+     * @param id User ID
+     * @param userDTO Updated user data
+     * @return Updated user DTO
+     * @throws UserException if user not found or validation fails
+     */
 	@Override
+	public UserDTO updateUserBySelf(Long id, UserDTO userDTO) throws UserException {
+		User user = userRepository.findById(id).orElseThrow(() -> new UserException("User not found with id: "+id));
+		
+		// If the user is admin, they can update their own profile but not other user profile
+		if(user.getRole() == UserRole.ROLE_ADMIN) {
+			if(!user.getId().equals(id)) {
+				throw new UserException("Only admin can update their own profile");
+			}
+		}
+
+		// If the user is user, they can update their own profile but not other user profile
+		if(user.getRole() == UserRole.ROLE_USER) {
+			if(!user.getId().equals(id)) {
+				throw new UserException("Only user can update their own profile");
+			}
+		}
+
+		// Update the book
+		userMapper.updateEntityFromDTO(user, userDTO);
+
+		// Save the updated user
+		User updatedUser = userRepository.save(user);
+		return userMapper.toDTO(updatedUser);
+	}
+
+
+
+		@Override
 	public User getUserByEmail(String email) throws UserException {
 		User user=userRepository.findByEmail(email);
 		if(user==null){
@@ -101,7 +137,7 @@ public class UserServiceImpl implements UserService {
 
 
 	// @Override
-	// public UserDTO updateUser(Long userId, UserDTO userDTO) throws UserException {
+	// public UserDTO updateUserByAdmin(Long userId, UserDTO userDTO) throws UserException {
 	// 	User existingUser = getUserById(userId);
 	// 	if (existingUser == null) {
 	// 		throw new UserException("User not found with ID: " + userId);

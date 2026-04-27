@@ -58,7 +58,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to create fine", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(e.getMessage(), false));
+                    .body(new ApiResponse(e.getMessage(), false));
         }
     }
 
@@ -70,17 +70,16 @@ public class FineController {
      */
     @PostMapping("/{id}/pay")
     public ResponseEntity<?> payFineFully(
-        @PathVariable Long id, 
-        @RequestParam(required = false) String transactionId) {
+            @PathVariable Long id) {
         try {
             log.info("Full payment request for fine: {}", id);
             PaymentInitiateResponse response = fineService
-                    .payFineFully(id, transactionId);
+                    .payFineFully(id);
             return ResponseEntity.ok(response);
         } catch (FineException e) {
             log.error("Payment failed for fine: {}", id, e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(e.getMessage(), false));
+                    .body(new ApiResponse(e.getMessage(), false));
         } catch (PaymentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), false));
@@ -103,7 +102,7 @@ public class FineController {
         } catch (FineException e) {
             log.error("Failed to waive fine: {}", waiveRequest.getFineId(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(e.getMessage(), false));
+                    .body(new ApiResponse(e.getMessage(), false));
         }
     }
 
@@ -122,7 +121,7 @@ public class FineController {
         } catch (FineException e) {
             log.error("Fine not found: {}", id, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse(e.getMessage(), false));
+                    .body(new ApiResponse(e.getMessage(), false));
         }
     }
 
@@ -139,7 +138,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch fines for book loan: {}", bookLoanId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
         }
     }
 
@@ -158,7 +157,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch my fines", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
         }
     }
 
@@ -180,7 +179,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch fines", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch fines: " + e.getMessage(), false));
         }
     }
 
@@ -199,7 +198,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch total unpaid fines", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
         }
     }
 
@@ -216,7 +215,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch total unpaid fines for user: {}", userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
         }
     }
 
@@ -233,7 +232,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch total collected fines", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
         }
     }
 
@@ -250,7 +249,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to fetch total outstanding fines", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to fetch total: " + e.getMessage(), false));
         }
     }
 
@@ -267,7 +266,7 @@ public class FineController {
         } catch (Exception e) {
             log.error("Failed to check unpaid fines for user: {}", userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Failed to check fines: " + e.getMessage(), false));
+                    .body(new ApiResponse("Failed to check fines: " + e.getMessage(), false));
         }
     }
 
@@ -285,7 +284,7 @@ public class FineController {
         } catch (FineException e) {
             log.error("Failed to delete fine: {}", id, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse(e.getMessage(), false));
+                    .body(new ApiResponse(e.getMessage(), false));
         }
     }
 

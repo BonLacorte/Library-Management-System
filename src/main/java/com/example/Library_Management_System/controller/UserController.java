@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
-
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -29,45 +27,55 @@ public class UserController {
 	// ==================== CRUD OPERATIONS ====================
 
 	/**
-     * Get own user profile 
-     * GET /api/users/profile
-     */
+	 * Get own user profile
+	 * GET /api/users/profile
+	 */
 	@GetMapping("/api/users/profile")
 	public ResponseEntity<UserDTO> getUserProfileFromJwtHandler(
 			@RequestHeader("Authorization") String jwt) throws UserException {
 		User user = userService.getUserFromJwtToken(jwt);
-		UserDTO userDTO=UserMapper.toDTO(user);
+		UserDTO userDTO = UserMapper.toDTO(user);
 
-		return new ResponseEntity<>(userDTO,HttpStatus.OK);
+		return new ResponseEntity<>(userDTO, HttpStatus.OK);
+	}
+
+	/**
+	 * Update own user profile
+	 * PUT /api/users/profile
+	 */
+	@PutMapping("/api/users/profile")
+	public ResponseEntity<UserDTO> updateUserProfileHandler(
+			@Valid @RequestBody UserDTO userDTO) throws UserException {
+		UserDTO updatedUser = userService.updateUserBySelf(userDTO.getId(), userDTO);
+		return new ResponseEntity<>(updatedUser, HttpStatus.OK);
 	}
 
 	// ================= Admin methods ====================
 
 	/**
-     * Get list of all users (Admin only)
-     * GET /api/users/list
-     */
-	@GetMapping("/api/users/list")
+	 * Get list of all users (Admin only)
+	 * GET /api/users/list
+	 */
+	@GetMapping("/api/users/admin/list")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<User>> getUsersListHandler() throws UserException {
 		List<User> users = userService.getUsers();
 
-		return new ResponseEntity<>(users,HttpStatus.OK);
+		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
 	/**
-     * Get user by ID (Admin only)
-     * GET /api/users/{userId}
-     */
-	@GetMapping("/api/users/{userId}")
+	 * Get user by ID (Admin only)
+	 * GET /api/users/{userId}
+	 */
+	@GetMapping("/api/users/admin/{userId}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<UserDTO> getUserByIdHandler(
-			@PathVariable Long userId
-	) throws UserException {
+			@PathVariable Long userId) throws UserException {
 		User user = userService.getUserById(userId);
-		UserDTO userDTO=UserMapper.toDTO(user);
+		UserDTO userDTO = UserMapper.toDTO(user);
 
-		return new ResponseEntity<>(userDTO,HttpStatus.OK);
+		return new ResponseEntity<>(userDTO, HttpStatus.OK);
 	}
 
 	/**
@@ -78,7 +86,7 @@ public class UserController {
 	 *
 	 * Example response:
 	 * {
-	 *   "totalUsers": 245
+	 * "totalUsers": 245
 	 * }
 	 */
 	@GetMapping("/api/users/statistics")
@@ -97,13 +105,20 @@ public class UserController {
 	 *
 	 * Example response:
 	 * {
-	 *   "message": "Admin deleted successfully",
-	 *   "success": true
+	 * "message": "Admin deleted successfully",
+	 * "success": true
 	 * }
 	 */
 	@DeleteMapping("/api/users/{userId}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long userId) throws UserException {
+
+		// Check if the user is the current admin
+		User currentUser = userService.getCurrentUser();
+		if (currentUser.getId().equals(userId)) {
+			throw new UserException("You cannot delete yourself");
+		}
+
 		userService.deleteUser(userId);
 		return ResponseEntity.ok(new ApiResponse("User deleted successfully", true));
 	}
